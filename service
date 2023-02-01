@@ -1,0 +1,72 @@
+package com.example.demo.service;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import com.example.demo.model.FileModel;
+
+@Service
+public class FileService {
+	
+	private String  path="C:\\Users\\Giri\\Documents\\";
+	public String getallfiles(FileModel filemodel) throws IOException
+	{
+		String filename=filemodel.getFilename();
+		String fullpath=path+filename;
+		File file=new File(fullpath);
+		if(file.exists())
+		{
+			return "file is there";
+		}
+		else
+		{
+			String filename1=filename.concat(".xml");
+			File newfile=new File(path+filename1);
+			BufferedWriter writer=new BufferedWriter(new FileWriter(newfile,true));
+			String orderdata=filemodel.getOrderdata();
+			writer.append(orderdata);
+			String filePath = path+filemodel.getVinno();
+	        File xmlFile = new File(filePath);
+	        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+	        DocumentBuilder dBuilder;
+	        try {
+	            dBuilder = dbFactory.newDocumentBuilder();
+	            Document doc = dBuilder.parse(xmlFile);
+	            doc.getDocumentElement().normalize();
+	            System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
+	            NodeList nodeList =  doc.getElementsByTagName("User");
+	            for(int itr=0;itr<nodeList.getLength();itr++)
+	            {
+	            	Node node=nodeList.item(itr);
+	            	//if (node.getNodeType() == Node.ELEMENT_NODE) 
+	            	//{
+	            	Element element=(Element) node;
+	            	System.out.println("id= "+element.getElementsByTagName("id").item(0).getTextContent());
+	            	String id=element.getElementsByTagName("id").item(0).getTextContent();
+	            	writer.append(id);
+	            //	}
+	            }
+	            writer.close();
+	        }
+	        catch (SAXException | ParserConfigurationException | IOException e1) {
+	            e1.printStackTrace();
+	        }
+		}
+		
+		return "created";
+	}
+
+}
